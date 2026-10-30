@@ -1,10 +1,45 @@
-<div align="center">
+name: Build Shawon Tech Android APK
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
-  <h1>Built with AI Studio</h2>
+permissions:
+  contents: read
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-  <a 
-</div>
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        run: |
+          sdkmanager "platforms;android-36.1" \
+                     "build-tools;36.0.0" \
+                     "platform-tools"
+
+      - name: Build Debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shawon-Tech-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
